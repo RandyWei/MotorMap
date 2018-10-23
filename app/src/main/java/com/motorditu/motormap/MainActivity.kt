@@ -1,16 +1,15 @@
 package com.motorditu.motormap
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
-import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
+import android.view.*
+import android.view.animation.Animation
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.transaction
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -35,7 +34,6 @@ import com.motorditu.motormap.adapter.TipAdapter
 import com.motorditu.motormap.fragment.RouteSearchFragment
 import com.motorditu.motormap.overlay.PoiOverlay
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.route_search_fragment_layout.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -44,10 +42,12 @@ import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchListener {
 
+
     private var tipAdapter: TipAdapter? = null
     private var tips: MutableList<Tip>? = null
     private val ROUTE_FRAGMENT_TAG = "RouteSearchFragment"
-    private var defaultWindowAttr:WindowManager.LayoutParams? = null
+    private var defaultWindowAttr: WindowManager.LayoutParams? = null
+    private var routeSearchFragment: RouteSearchFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -194,10 +194,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
         }
 
         route_search_button.setOnClickListener {
-
+            //resetStatusBar()
             supportFragmentManager.transaction(allowStateLoss = true) {
                 replace(R.id.fragment_container, RouteSearchFragment.newInstance(), ROUTE_FRAGMENT_TAG)
-                resetStatusBar()
             }
         }
 
@@ -209,6 +208,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
 //        val query = DriveRouteQuery(RouteSearch.FromAndTo(LatLonPoint(116.370314, 40.081455), LatLonPoint(116.424825,39.953471)), RouteSearch.DrivingNoHighWaySaveMoney, null, null, "")
 //        routeSearch.calculateDriveRouteAsyn(query)
     }
+
 
     private fun showLocationButton(amap: AMap) {
         val uiSettings = amap.uiSettings
@@ -232,6 +232,43 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
         super.onResume()
         //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
         map.onResume()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            onBackPressed()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    private fun hideSoftInput() {
+        try {
+            val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(this.currentFocus!!.windowToken, 0)
+        } catch (e: Exception) {
+            //e.printStackTrace();
+        }
+
+    }
+
+    override fun onBackPressed() {
+        hideSoftInput()
+        var routeSearchFragment = supportFragmentManager.findFragmentByTag(ROUTE_FRAGMENT_TAG)
+        if (null != routeSearchFragment) {
+            routeSearchFragment = routeSearchFragment as RouteSearchFragment
+            if (!routeSearchFragment.onBackPressed()) {
+                routeSearchFragment.hideFragmentAnim(object : RouteSearchFragment.AnimationListener {
+                    override fun onAnimationEnd(anim: Animation?) {
+                        supportFragmentManager.transaction(allowStateLoss = true) {
+                            remove(routeSearchFragment)
+                        }
+                    }
+                })
+            }
+        } else {
+            super.onBackPressed()
+        }
     }
 
     override fun onPause() {
@@ -271,7 +308,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
     private fun resetStatusBar() {
         val window = window
         window.statusBarColor = Color.WHITE
-        window.decorView.systemUiVisibility =  View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //设置状态栏文字颜色及图标为深色

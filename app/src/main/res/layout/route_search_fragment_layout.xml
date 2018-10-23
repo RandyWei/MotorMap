@@ -1,186 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipToPadding="false"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="8dp"
-            app:contentScrim="#fff"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/recycler_view">
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+            <View
+                android:id="@+id/top_padding_view"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="@color/colorPrimaryDark" />
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:contentInsetLeft="0dp"
-                app:contentInsetStart="0dp"
-                app:contentInsetStartWithNavigation="0dp"
-                app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/ic_arrow_back_black_24dp">
+                android:paddingStart="0dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="1dp"
+                app:contentScrim="#fff"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/route_search_addr_bg"
-                    android:padding="8dp">
+                    app:contentInsetLeft="0dp"
+                    app:contentInsetStart="0dp"
+                    app:contentInsetStartWithNavigation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:navigationIcon="@drawable/ic_arrow_back_black_24dp">
 
-                    <ImageView
-                        android:id="@+id/imageView1"
-                        android:layout_width="15dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_adjust_green_24dp" />
+                        android:background="@drawable/route_search_addr_bg"
+                        android:padding="8dp">
 
-                    <ImageView
-                        android:id="@+id/imageView2"
-                        android:layout_width="10dp"
-                        android:layout_height="15dp"
-                        app:layout_constraintBottom_toTopOf="@+id/imageView3"
-                        app:layout_constraintEnd_toEndOf="@+id/imageView1"
-                        app:layout_constraintStart_toStartOf="@+id/imageView1"
-                        app:layout_constraintTop_toBottomOf="@+id/imageView1"
-                        app:srcCompat="@drawable/ic_more_vert_gray_24dp" />
+                        <ImageView
+                            android:id="@+id/imageView1"
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:srcCompat="@drawable/ic_adjust_green_24dp" />
 
-                    <ImageView
-                        android:id="@+id/imageView3"
-                        android:layout_width="15dp"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:srcCompat="@drawable/ic_adjust_red_24dp" />
+                        <ImageView
+                            android:id="@+id/imageView2"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            app:layout_constraintBottom_toTopOf="@+id/imageView3"
+                            app:layout_constraintEnd_toEndOf="@+id/imageView1"
+                            app:layout_constraintStart_toStartOf="@+id/imageView1"
+                            app:layout_constraintTop_toBottomOf="@+id/imageView1"
+                            app:srcCompat="@drawable/ic_more_vert_gray_24dp" />
 
-                    <TextView
-                        android:id="@+id/textView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="我的位置"
-                        app:layout_constraintBottom_toBottomOf="@+id/imageView1"
-                        app:layout_constraintStart_toEndOf="@id/imageView1"
-                        app:layout_constraintTop_toTopOf="@+id/imageView1" />
+                        <ImageView
+                            android:id="@+id/imageView3"
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:srcCompat="@drawable/ic_adjust_red_24dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="我的位置1"
-                        app:layout_constraintTop_toTopOf="@+id/imageView3"
-                        app:layout_constraintStart_toEndOf="@id/imageView3"
-                        app:layout_constraintBottom_toBottomOf="@+id/imageView3"
-                        android:layout_marginStart="8dp"/>
+                        <EditText
+                            android:id="@+id/from_edit_text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:background="@null"
+                            android:hint="输入起点"
+                            android:padding="0dp"
+                            android:text="我的位置"
+                            android:textSize="14sp"
+                            app:layout_constraintBottom_toBottomOf="@+id/imageView1"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/imageView1"
+                            app:layout_constraintTop_toTopOf="@+id/imageView1" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <EditText
+                            android:id="@+id/to_edit_text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:background="@null"
+                            android:hint="输入终点"
+                            android:padding="0dp"
+                            android:textSize="14sp"
+                            app:layout_constraintBottom_toBottomOf="@+id/imageView3"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/imageView3"
+                            app:layout_constraintTop_toTopOf="@+id/imageView3" />
 
-            </androidx.appcompat.widget.Toolbar>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+                </androidx.appcompat.widget.Toolbar>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/route_type_button_bg"
-                android:gravity="center">
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                app:tabIconTintMode="multiply"
+                app:tabInlineLabel="true"
+                app:tabMode="scrollable"
+                app:tabSelectedTextColor="#333"
+                app:tabTextAppearance="@style/route_search_tablayout_style"
+                app:tabTextColor="#999">
 
-                <ImageView
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_directions_car_black_24dp" />
+                    android:icon="@drawable/ic_directions_car"
+                    android:text="驾车" />
 
-                <TextView
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="驾车"
-                    android:textColor="#fff" />
-            </LinearLayout>
+                    android:backgroundTintMode="add"
+                    android:icon="@drawable/ic_directions_motorcycle"
+                    android:text="摩托车" />
 
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/route_type_button_bg"
-                android:gravity="center">
-
-                <ImageView
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_motorcycle_black_24dp" />
+                    android:icon="@drawable/ic_directions_bike"
+                    android:text="骑行" />
 
-                <TextView
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="摩托车"
-                    android:textColor="#fff" />
-            </LinearLayout>
+                    android:icon="@drawable/ic_directions_walk"
+                    android:text="步行" />
+            </com.google.android.material.tabs.TabLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/route_type_button_bg"
-                android:gravity="center">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#fff"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/coordinator" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_directions_bike_black_24dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="骑行"
-                    android:textColor="#fff" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/route_type_button_bg"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_directions_walk_black_24dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="步行"
-                    android:textColor="#fff" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

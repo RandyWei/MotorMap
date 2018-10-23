@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 
-open class KBaseFragment : Fragment() {
+abstract class KBaseFragment : Fragment() {
 
     private var isFragmentVisible: Boolean = false
     private var isReuseView: Boolean = false
@@ -110,4 +110,11 @@ open class KBaseFragment : Fragment() {
     open fun isFragmentVisible(): Boolean {
         return isFragmentVisible
     }
+
+    /**
+     * 所有继承BackHandledFragment的子类都将在这个方法中实现物理Back键按下后的逻辑
+     * FragmentActivity捕捉到物理返回键点击事件后会首先询问Fragment是否消费该事件
+     * 如果没有Fragment消息时FragmentActivity自己才会消费该事件
+     */
+    abstract fun onBackPressed(): Boolean
 }

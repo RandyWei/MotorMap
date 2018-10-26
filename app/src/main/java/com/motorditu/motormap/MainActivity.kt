@@ -1,13 +1,17 @@
 package com.motorditu.motormap
 
 import android.content.Context
+import android.graphics.BitmapShader
 import android.graphics.Color
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.SparseArray
 import android.view.*
 import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.ViewCompat
@@ -16,22 +20,31 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amap.api.maps.AMap
 import com.amap.api.maps.CameraUpdateFactory
+import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MyLocationStyle
 import com.amap.api.maps.model.PolygonOptions
+import com.amap.api.navi.AMapNavi
+import com.amap.api.navi.AMapNaviListener
+import com.amap.api.navi.AMapNaviViewOptions
+import com.amap.api.navi.model.*
+import com.amap.api.navi.view.RouteOverLay
 import com.amap.api.services.core.AMapException
+import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItem
 import com.amap.api.services.help.Inputtips
 import com.amap.api.services.help.InputtipsQuery
 import com.amap.api.services.help.Tip
 import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
-import com.amap.api.services.route.*
+import com.amap.api.services.route.DriveRouteResult
+import com.autonavi.tbt.TrafficFacilityInfo
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 import com.motorditu.motormap.adapter.TipAdapter
 import com.motorditu.motormap.fragment.RouteSearchFragment
+import com.motorditu.motormap.overlay.DrivingRouteOverlay
 import com.motorditu.motormap.overlay.PoiOverlay
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
@@ -40,14 +53,21 @@ import org.jetbrains.anko.toast
 import org.json.JSONObject
 
 
-class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchListener {
-
+class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearchFragment.RouteSearchListener {
 
     private var tipAdapter: TipAdapter? = null
     private var tips: MutableList<Tip>? = null
     private val ROUTE_FRAGMENT_TAG = "RouteSearchFragment"
     private var defaultWindowAttr: WindowManager.LayoutParams? = null
-    private var routeSearchFragment: RouteSearchFragment? = null
+    private var currentLocation: Location? = null
+
+
+    private var amap: AMap? = null
+
+    /**
+     * 保存当前算好的路线
+     */
+    private val routeOverlays = SparseArray<RouteOverLay>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +75,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
         translucent()
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         map.onCreate(savedInstanceState)//必须重写
-        val amap = map.map
+        amap = map.map
 
-        setLocationStyle(amap)
+
+        setLocationStyle()
 
         search_view.isIconified = true
         search_view.onActionViewExpanded()
@@ -86,7 +107,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
                                             .searchSuggestionCitys// 当搜索不到poiitem数据时，会返回含有搜索关键字的城市信息
 
                                     if (poiItems != null && poiItems.size > 0) {
-                                        amap.clear()// 清理之前的图标
+                                        amap?.clear()// 清理之前的图标
                                         val poiOverlay = PoiOverlay(amap, poiItems)
                                         poiOverlay.removeFromMap()
                                         poiOverlay.addToMap()
@@ -193,20 +214,21 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
             }
         }
 
-        route_search_button.setOnClickListener {
+        route_search_button.setOnClickListener { _ ->
             //resetStatusBar()
+            val routeSearchFragment = RouteSearchFragment.newInstance()
             supportFragmentManager.transaction(allowStateLoss = true) {
-                replace(R.id.fragment_container, RouteSearchFragment.newInstance(), ROUTE_FRAGMENT_TAG)
+                replace(R.id.fragment_container, routeSearchFragment, ROUTE_FRAGMENT_TAG)
+            }
+            route_search_button.hide()
+            //VisibilityAwareImageButton.setVisibility
+            routeSearchFragment.setRouteSearchListener(this)
+            //设置默认起点为我的位置
+            currentLocation?.let {
+                routeSearchFragment.setFromPoint(LatLonPoint(it.latitude, it.longitude))
             }
         }
 
-//        val routeSearch = RouteSearch(this)
-//        routeSearch.setRouteSearchListener(this)
-//        // fromAndTo包含路径规划的起点和终点，drivingMode表示驾车模式
-//        // 第三个参数表示途经点（最多支持16个），第四个参数表示避让区域（最多支持32个），第五个参数表示避让道路
-//
-//        val query = DriveRouteQuery(RouteSearch.FromAndTo(LatLonPoint(116.370314, 40.081455), LatLonPoint(116.424825,39.953471)), RouteSearch.DrivingNoHighWaySaveMoney, null, null, "")
-//        routeSearch.calculateDriveRouteAsyn(query)
     }
 
 
@@ -215,17 +237,23 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
         uiSettings.isMyLocationButtonEnabled = true
     }
 
-    private fun setLocationStyle(amap: AMap) {
-        //初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);
-        // 连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
-        val locationStyle = MyLocationStyle()
-        locationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE)//定位一次，且将视角移动到地图中心点。
-        locationStyle.interval(2000) //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
-        amap.myLocationStyle = locationStyle
-        amap.isMyLocationEnabled = true // 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
-        //设置希望展示的地图缩放级别
-        val mCameraUpdate = CameraUpdateFactory.zoomTo(17.toFloat())
-        amap.animateCamera(mCameraUpdate)
+    private fun setLocationStyle() {
+        amap?.let {
+            //初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);
+            // 连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
+            val locationStyle = MyLocationStyle()
+            locationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE)//定位一次，且将视角移动到地图中心点。
+            locationStyle.interval(2000) //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
+            it.myLocationStyle = locationStyle
+            it.isMyLocationEnabled = true // 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
+            //设置希望展示的地图缩放级别
+            val mCameraUpdate = CameraUpdateFactory.zoomTo(17.toFloat())
+            it.animateCamera(mCameraUpdate)
+            it.setOnMyLocationChangeListener { location ->
+                //从location对象中获取经纬度信息，地址描述信息，建议拿到位置之后调用逆地理编码接口获取（获取地址描述数据章节有介绍）
+                currentLocation = location
+            }
+        }
     }
 
     override fun onResume() {
@@ -249,7 +277,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
         } catch (e: Exception) {
             //e.printStackTrace();
         }
-
     }
 
     override fun onBackPressed() {
@@ -263,6 +290,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
                         supportFragmentManager.transaction(allowStateLoss = true) {
                             remove(routeSearchFragment)
                         }
+                        route_search_button.show()
+                        clearRoute()
                     }
                 })
             }
@@ -274,30 +303,92 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearch.OnRouteSearchL
     override fun onPause() {
         super.onPause()
         //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
-        map.onPause()
+        map?.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
-        map.onDestroy()
-    }
+        map?.onDestroy()
 
-    override fun onDriveRouteSearched(p0: DriveRouteResult?, p1: Int) {
 
     }
 
-    override fun onBusRouteSearched(p0: BusRouteResult?, p1: Int) {
+    override fun onDriveRouteSearched(driverRouteResult: DriveRouteResult?) {
+        amap?.let { it ->
+            driverRouteResult?.let { driverRouteResult ->
+                val drivePath = driverRouteResult.paths[0] ?: return
+                val drivingRouteOverlay = DrivingRouteOverlay(
+                        it, drivePath, driverRouteResult.startPos,
+                        driverRouteResult.targetPos,
+                        null)
+                drivingRouteOverlay.setNodeIconVisibility(false)//设置节点marker是否显示
+                drivingRouteOverlay.setColorfulline(false)//是否用颜色展示交通拥堵情况，默认true
+                drivingRouteOverlay.removeFromMap()
+                drivingRouteOverlay.addToMap()
+                drivingRouteOverlay.zoomToSpan()
+            }
+        }
+    }
+
+    override fun onCalculateRouteSuccess(aMapCalcRouteResult: AMapCalcRouteResult?) {
 
     }
 
-    override fun onRideRouteSearched(p0: RideRouteResult?, p1: Int) {
+    override fun onCalculateRouteSuccess(ints: IntArray, paths: HashMap<Int, AMapNaviPath>) {
+        clearRoute()
+        hideSoftInput()
+        val routeOverlayOptions = getRouteOverlayOptions()
 
+        for (i in ints.indices) {
+            val path = paths[ints[i]]
+            if (path != null) {
+                drawRoutes(ints[i], path, routeOverlayOptions)
+            }
+        }
+        val routeSearchFragment = supportFragmentManager.findFragmentByTag(ROUTE_FRAGMENT_TAG) as RouteSearchFragment
+        routeSearchFragment.setRouteOverlays(routeOverlays)
     }
 
-    override fun onWalkRouteSearched(p0: WalkRouteResult?, p1: Int) {
+    private fun getRouteOverlayOptions(): RouteOverlayOptions {
+        val routeOverlayOptions = RouteOverlayOptions()
 
+        routeOverlayOptions.lineWidth = 25.toFloat()
+        //设置交通状况情况良好下的纹理位图和默认情况下
+        routeOverlayOptions.unknownTraffic = BitmapDescriptorFactory.fromResource(R.drawable.map_alr).bitmap
+        routeOverlayOptions.smoothTraffic = BitmapDescriptorFactory.fromResource(R.drawable.map_alr).bitmap
+        //设置交通状况迟缓下的纹理位图
+        routeOverlayOptions.slowTraffic = BitmapDescriptorFactory.fromResource(R.drawable.map_alr_yellow).bitmap
+        //设置交通状况拥堵下的纹理位图
+        routeOverlayOptions.jamTraffic = BitmapDescriptorFactory.fromResource(R.drawable.map_alr_red).bitmap
+        //设置交通状况非常拥堵下的纹理位图
+        routeOverlayOptions.veryJamTraffic = BitmapDescriptorFactory.fromResource(R.drawable.map_alr_dark_red).bitmap
+        return routeOverlayOptions
     }
+
+    private fun drawRoutes(routeId: Int, path: AMapNaviPath, routeOverlayOptions: RouteOverlayOptions) {
+        amap?.moveCamera(CameraUpdateFactory.changeTilt(0f))
+        val routeOverLay = RouteOverLay(amap, path, this)
+
+        routeOverLay.routeOverlayOptions = routeOverlayOptions
+        routeOverLay.isTrafficLine = true
+        routeOverLay.addToMap()
+
+        routeOverlays.put(routeId, routeOverLay)
+    }
+
+
+    /**
+     * 清除当前地图上算好的路线
+     */
+    private fun clearRoute() {
+        for (i in 0 until routeOverlays.size()) {
+            val routeOverlay = routeOverlays.valueAt(i)
+            routeOverlay.removeFromMap()
+        }
+        routeOverlays.clear()
+    }
+
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)

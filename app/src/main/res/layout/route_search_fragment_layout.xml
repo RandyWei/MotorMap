@@ -5,10 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/routes_plan_button"
+        android:layout_width="70dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="90dp"
+        android:background="#ddd"
+        android:elevation="0dp"
+        android:padding="0dp"
+        android:text="智能推荐 >"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/routes_select_tools_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
+
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:elevation="2dp">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/app_bar"
@@ -16,8 +34,7 @@
             android:layout_height="wrap_content"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toTopOf="@+id/recycler_view">
+            android:orientation="vertical">
 
             <View
                 android:id="@+id/top_padding_view"
@@ -84,8 +101,10 @@
                             android:layout_marginStart="8dp"
                             android:background="@null"
                             android:hint="输入起点"
+                            android:imeOptions="actionSearch"
+                            android:inputType="text"
+                            android:lines="1"
                             android:padding="0dp"
-                            android:text="我的位置"
                             android:textSize="14sp"
                             app:layout_constraintBottom_toBottomOf="@+id/imageView1"
                             app:layout_constraintEnd_toEndOf="parent"
@@ -99,6 +118,9 @@
                             android:layout_marginStart="8dp"
                             android:background="@null"
                             android:hint="输入终点"
+                            android:imeOptions="actionSearch"
+                            android:inputType="text"
+                            android:lines="1"
                             android:padding="0dp"
                             android:textSize="14sp"
                             app:layout_constraintBottom_toBottomOf="@+id/imageView3"
@@ -116,6 +138,7 @@
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:visibility="gone"
                 app:tabIconTintMode="multiply"
                 app:tabInlineLabel="true"
                 app:tabMode="scrollable"
@@ -126,15 +149,15 @@
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:icon="@drawable/ic_directions_car"
-                    android:text="驾车" />
+                    android:backgroundTintMode="add"
+                    android:icon="@drawable/ic_directions_motorcycle"
+                    android:text="摩托车" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTintMode="add"
-                    android:icon="@drawable/ic_directions_motorcycle"
-                    android:text="摩托车" />
+                    android:icon="@drawable/ic_directions_car"
+                    android:text="驾车" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
@@ -149,15 +172,94 @@
                     android:text="步行" />
             </com.google.android.material.tabs.TabLayout>
         </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#fff"
+            android:visibility="gone"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+
+            android:id="@+id/routes_select_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:behavior_hideable="false"
+            app:behavior_peekHeight="150dp"
+            app:layout_behavior="@string/bottom_sheet_behavior">
+
+            <View
+                android:id="@+id/top_padding_bottom_view"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="#0000" />
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/routes_select_tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="85dp"
+                android:background="#fff"
+                app:layout_constraintTop_toBottomOf="@+id/top_padding_bottom_view"
+                app:tabIconTintMode="multiply"
+                app:tabIndicator="@null"
+                app:tabIndicatorHeight="0dp"
+                app:tabInlineLabel="true"
+                app:tabSelectedTextColor="#333"
+                app:tabTextAppearance="@style/route_search_tablayout_style"
+                app:tabTextColor="#999">
+
+
+            </com.google.android.material.tabs.TabLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="#fff"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/routes_select_tab_layout" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/routes_select_tools_layout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="45dp"
         android:background="#fff"
+        android:elevation="2dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/coordinator" />
+        tools:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="路线详情"
+            android:textColor="#333"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/start_nav_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="开始导航"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

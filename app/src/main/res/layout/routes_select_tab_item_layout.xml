@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/route_scheme_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@drawable/ic_route_select_tab_style"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/route_scheme_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@drawable/ic_route_select_tab_style"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/route_scheme_name" />
+
+    <TextView
+        android:id="@+id/route_scheme_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@drawable/ic_route_select_tab_style"
+        android:textSize="11sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/route_scheme_time" />
+
+    <TextView
+        android:id="@+id/route_scheme_light_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:drawableStart="@drawable/ic_traffic_666666_10dp"
+        android:textColor="@drawable/ic_route_select_tab_style"
+        android:textSize="11sp"
+        app:layout_constraintBottom_toBottomOf="@+id/route_scheme_distance"
+        app:layout_constraintStart_toEndOf="@+id/route_scheme_distance"
+        app:layout_constraintTop_toTopOf="@+id/route_scheme_distance" />
+
+    <TextView
+        android:id="@+id/route_scheme_money"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textColor="@drawable/ic_route_select_tab_style"
+        android:textSize="11sp"
+        app:layout_constraintBottom_toBottomOf="@+id/route_scheme_distance"
+        app:layout_constraintStart_toEndOf="@+id/route_scheme_light_count"
+        app:layout_constraintTop_toTopOf="@+id/route_scheme_distance" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

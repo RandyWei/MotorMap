@@ -1,18 +1,21 @@
 package com.motorditu.motormap.fragment
 
 import android.content.Context
+import android.content.DialogInterface
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.util.Log
 import android.util.SparseArray
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
+import android.widget.PopupWindow
 import androidx.core.view.setPadding
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amap.api.navi.AMapNavi
@@ -29,9 +32,12 @@ import com.autonavi.tbt.TrafficFacilityInfo
 import com.google.android.material.tabs.TabLayout
 import com.motorditu.motormap.MainActivity
 import com.motorditu.motormap.R
+import com.motorditu.motormap.activity.RouteNaviActivity
 import com.motorditu.motormap.adapter.TipAdapter
+import com.motorditu.motormap.extensions.screenWidth
 import kotlinx.android.synthetic.main.route_search_fragment_layout.*
 import kotlinx.android.synthetic.main.routes_select_tab_item_layout.view.*
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
 
@@ -49,6 +55,13 @@ class RouteSearchFragment : KBaseFragment(), RouteSearch.OnRouteSearchListener, 
     private var routeSearchListener: RouteSearchListener? = null
 
     private var amapNavi: AMapNavi? = null
+
+    //查询路线规则
+
+    private var congestion = true //躲避拥堵
+    private var avoidhightspeed = true //不走高速
+    private var cost = true //避免收费
+    private var hightspeed = false //高速优先
 
     /**
      * 路线的权值，重合路线情况下，权值高的路线会覆盖权值低的路线
@@ -133,6 +146,42 @@ class RouteSearchFragment : KBaseFragment(), RouteSearch.OnRouteSearchListener, 
                 changeRoute(tab?.position ?: 0)
             }
         })
+
+        //路线计算方式按钮
+        routes_plan_button.setOnClickListener {
+            val location = IntArray(2)
+            routes_plan_button.getLocationOnScreen(location)
+            val dialog = RoutesPlanSelectDialogFragment.newInstance(0, location[1], congestion, avoidhightspeed, cost, hightspeed)
+            dialog.show(fragmentManager, "routes_plan")
+            dialog.setOnDismissListener { congestion, avoidhightspeed, cost, hightspeed ->
+                this.congestion = congestion
+                this.avoidhightspeed = avoidhightspeed
+                this.cost = cost
+                this.hightspeed = hightspeed
+
+                var str = ""
+                if (this.congestion)
+                    str = "躲避拥堵"
+                if (this.avoidhightspeed)
+                    str += "不走高速"
+                if (this.cost)
+                    str += "避免收费"
+                if (this.hightspeed)
+                    str += "高速优先"
+
+                if (this.congestion && this.avoidhightspeed && this.cost)
+                    str = "智能推荐"
+
+                str += " >"
+
+                routes_plan_button.text = str
+                searchRoute()
+            }
+        }
+
+        start_nav_button.setOnClickListener {
+            it.context.startActivity<RouteNaviActivity>()
+        }
     }
 
     private fun searchRoute() {
@@ -175,8 +224,6 @@ class RouteSearchFragment : KBaseFragment(), RouteSearch.OnRouteSearchListener, 
                  * strategyFlag转换出来的值都对应PathPlanningStrategy常量，用户也可以直接传入PathPlanningStrategy常量进行算路。
                  * 如:mAMapNavi.calculateDriveRoute(mStartList, mEndList, mWayPointList,PathPlanningStrategy.DRIVING_DEFAULT);
                  */
-
-
                 /**
                  * 方法:
                  *   int strategy=mAMapNavi.strategyConvert(congestion, avoidhightspeed, cost, hightspeed, multipleroute);
@@ -196,7 +243,7 @@ class RouteSearchFragment : KBaseFragment(), RouteSearch.OnRouteSearchListener, 
                 amapNavi?.let { amapNavi ->
                     var strategyFlag = 0
                     try {
-                        strategyFlag = amapNavi.strategyConvert(true, false, false, true, true)
+                        strategyFlag = amapNavi.strategyConvert(congestion, avoidhightspeed, cost, hightspeed, true)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -321,6 +368,7 @@ class RouteSearchFragment : KBaseFragment(), RouteSearch.OnRouteSearchListener, 
     }
 
     private fun showRoutesSelectLayout(ints: IntArray, paths: java.util.HashMap<Int, AMapNaviPath>) {
+        routes_select_tab_layout.removeAllTabs()
         for (i in ints.indices) {
             val path = paths[ints[i]]
             if (path != null) {
@@ -339,9 +387,10 @@ class RouteSearchFragment : KBaseFragment(), RouteSearch.OnRouteSearchListener, 
                 }
             }
         }
+        routes_plan_button.visibility = View.VISIBLE
         routes_select_layout.visibility = View.VISIBLE
         routes_select_tools_layout.visibility = View.VISIBLE
-        routes_plan_button.visibility = View.VISIBLE
+
     }
 
     private fun hideRoutesSelectLayout() {

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MotorMap</string>
+
+    <string name="title_activity_route_navi">RouteNaviActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

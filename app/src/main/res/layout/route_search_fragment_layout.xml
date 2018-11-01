@@ -7,13 +7,14 @@
 
     <Button
         android:id="@+id/routes_plan_button"
-        android:layout_width="70dp"
-        android:layout_height="25dp"
+        android:layout_width="90dp"
+        android:layout_height="30dp"
         android:layout_marginStart="4dp"
         android:layout_marginBottom="90dp"
-        android:background="#ddd"
+        android:background="#fff"
         android:elevation="0dp"
-        android:padding="0dp"
+        android:ellipsize="middle"
+        android:singleLine="true"
         android:text="智能推荐 >"
         android:textSize="12sp"
         android:visibility="gone"
@@ -182,16 +183,16 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-
             android:id="@+id/routes_select_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="130dp"
             android:visibility="gone"
             app:behavior_hideable="false"
             app:behavior_peekHeight="150dp"
             app:layout_behavior="@string/bottom_sheet_behavior">
 
             <View
+                android:visibility="gone"
                 android:id="@+id/top_padding_bottom_view"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
@@ -207,6 +208,7 @@
                 app:tabIndicator="@null"
                 app:tabIndicatorHeight="0dp"
                 app:tabInlineLabel="true"
+                app:tabPadding="0dp"
                 app:tabSelectedTextColor="#333"
                 app:tabTextAppearance="@style/route_search_tablayout_style"
                 app:tabTextColor="#999">
@@ -215,6 +217,7 @@
             </com.google.android.material.tabs.TabLayout>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/route_detail_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:background="#fff"
@@ -244,6 +247,7 @@
             android:layout_marginBottom="8dp"
             android:text="路线详情"
             android:textColor="#333"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

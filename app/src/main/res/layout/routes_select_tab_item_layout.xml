@@ -12,6 +12,7 @@
         android:layout_marginTop="8dp"
         android:textColor="@drawable/ic_route_select_tab_style"
         android:textSize="13sp"
+        android:maxLines="2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,11 +24,13 @@
         android:layout_marginTop="4dp"
         android:textColor="@drawable/ic_route_select_tab_style"
         android:textSize="15sp"
+        android:lines="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/route_scheme_name" />
 
     <TextView
+        android:lines="1"
         android:id="@+id/route_scheme_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,6 +41,7 @@
         app:layout_constraintTop_toBottomOf="@+id/route_scheme_time" />
 
     <TextView
+        android:lines="1"
         android:id="@+id/route_scheme_light_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -50,6 +54,7 @@
         app:layout_constraintTop_toTopOf="@+id/route_scheme_distance" />
 
     <TextView
+        android:lines="1"
         android:id="@+id/route_scheme_money"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

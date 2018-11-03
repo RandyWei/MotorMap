@@ -8,47 +8,27 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import androidx.core.view.ViewCompat
-import com.amap.api.navi.AMapNavi
-import com.amap.api.navi.enums.NaviType
 import com.motorditu.motormap.R
-import kotlinx.android.synthetic.main.activity_route_navi.*
+import kotlinx.android.synthetic.main.user_profile_activity_layout.*
+import org.jetbrains.anko.startActivity
 
-
-class RouteNaviActivity : BaseActivity() {
-
-    private var aMapNavi: AMapNavi? = null
+class UserProfileActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_route_navi)
-//        translucent()
+        setContentView(R.layout.user_profile_activity_layout)
+        translucent()
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        map_nav_view.onCreate(savedInstanceState)
-
-        aMapNavi = AMapNavi.getInstance(applicationContext)
-        aMapNavi?.let {
-            it.setUseInnerVoice(true)
-            it.setEmulatorNaviSpeed(60)
-            it.startNavi(NaviType.EMULATOR)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
         }
-
+        app_bar.setOnClickListener {
+            startActivity<LoginActivity>()
+        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        map_nav_view.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        map_nav_view.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        map_nav_view.onDestroy()
-        aMapNavi?.stopNavi()
-    }
 
     private fun translucent() {
 
@@ -72,10 +52,8 @@ class RouteNaviActivity : BaseActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //设置状态栏文字颜色及图标为深色
-            //window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
 
     }
-
-
 }

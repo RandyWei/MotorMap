@@ -1,7 +1,6 @@
-package com.motorditu.motormap
+package com.motorditu.motormap.activity
 
 import android.content.Context
-import android.graphics.BitmapShader
 import android.graphics.Color
 import android.location.Location
 import android.os.Build
@@ -11,8 +10,6 @@ import android.util.SparseArray
 import android.view.*
 import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.transaction
@@ -24,9 +21,6 @@ import com.amap.api.maps.model.BitmapDescriptorFactory
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MyLocationStyle
 import com.amap.api.maps.model.PolygonOptions
-import com.amap.api.navi.AMapNavi
-import com.amap.api.navi.AMapNaviListener
-import com.amap.api.navi.AMapNaviViewOptions
 import com.amap.api.navi.model.*
 import com.amap.api.navi.view.RouteOverLay
 import com.amap.api.services.core.AMapException
@@ -38,10 +32,10 @@ import com.amap.api.services.help.Tip
 import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
 import com.amap.api.services.route.DriveRouteResult
-import com.autonavi.tbt.TrafficFacilityInfo
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
+import com.motorditu.motormap.R
 import com.motorditu.motormap.adapter.TipAdapter
 import com.motorditu.motormap.fragment.RouteSearchFragment
 import com.motorditu.motormap.overlay.DrivingRouteOverlay
@@ -49,11 +43,12 @@ import com.motorditu.motormap.overlay.PoiOverlay
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 import org.json.JSONObject
 
 
-class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearchFragment.RouteSearchListener {
+class MainActivity : BaseActivity(), AnkoLogger, RouteSearchFragment.RouteSearchListener {
 
     private var tipAdapter: TipAdapter? = null
     private var tips: MutableList<Tip>? = null
@@ -227,6 +222,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger, RouteSearchFragment.RouteS
             currentLocation?.let {
                 routeSearchFragment.setFromPoint(LatLonPoint(it.latitude, it.longitude))
             }
+        }
+
+        user_avatar.setOnClickListener {
+            startActivity<UserProfileActivity>()
         }
 
     }

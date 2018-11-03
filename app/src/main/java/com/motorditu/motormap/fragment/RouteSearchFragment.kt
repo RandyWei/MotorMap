@@ -1,9 +1,6 @@
 package com.motorditu.motormap.fragment
 
 import android.content.Context
-import android.content.DialogInterface
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
@@ -13,9 +10,7 @@ import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
-import android.widget.PopupWindow
 import androidx.core.view.setPadding
-import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amap.api.navi.AMapNavi
@@ -30,11 +25,10 @@ import com.amap.api.services.help.Tip
 import com.amap.api.services.route.*
 import com.autonavi.tbt.TrafficFacilityInfo
 import com.google.android.material.tabs.TabLayout
-import com.motorditu.motormap.MainActivity
+import com.motorditu.motormap.activity.MainActivity
 import com.motorditu.motormap.R
 import com.motorditu.motormap.activity.RouteNaviActivity
 import com.motorditu.motormap.adapter.TipAdapter
-import com.motorditu.motormap.extensions.screenWidth
 import kotlinx.android.synthetic.main.route_search_fragment_layout.*
 import kotlinx.android.synthetic.main.routes_select_tab_item_layout.view.*
 import org.jetbrains.anko.startActivity
